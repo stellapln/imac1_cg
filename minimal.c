@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+/************* CONSTANTES **************/
+
+
 /* Dimensions de la fenêtre */
 static unsigned int WINDOW_WIDTH = 400;
 static unsigned int WINDOW_HEIGHT = 400;
@@ -16,9 +20,8 @@ static unsigned int WINDOW_HEIGHT = 400;
 /* Nombre de bits par pixel de la fenêtre */
 static const unsigned int BIT_PER_PIXEL = 8;
 
-/* Couleurs RVB */
+/* Couleurs RVB (à savoir qu'un unsigned char est relatif à un int) */
 static const unsigned char COLORS[] = {
-
      255, 255, 255 ,
      0, 0, 0 ,
      255, 0, 0 ,
@@ -29,7 +32,7 @@ static const unsigned char COLORS[] = {
      255, 0, 255
 };
 
-/* Pour avoir les couleurs RVB du points */
+/* Pour avoir les couleurs RVB du points, on prend les 3 valeurs correspondantes à ce point */
 static const unsigned int NB_COLORS = sizeof(COLORS) / (3 * sizeof(unsigned char));
 
 
@@ -53,18 +56,18 @@ typedef struct Primitive{
 } Primitive, *PrimitiveList;
 
 
-/************** FONCTIONS **************/
+/************** FONCTIONS ***************/
 
 
 /* Création du point, placement dans la liste, dessin et libération de mémoire */
 Point* allocPoint(float x, float y, unsigned char r, unsigned char g, unsigned char b) {
-    Point* point;
-    point = (Point*)malloc(sizeof(Point));
+    Point* point = (Point*)malloc(sizeof(Point));
 
     if(!point) {
         printf("Error at point malloc\n");
         exit(1);
     }
+
     point->x = x;
     point->y = y;
     point->r = r;
@@ -77,9 +80,11 @@ Point* allocPoint(float x, float y, unsigned char r, unsigned char g, unsigned c
 
 void addPointToList(Point* point, PointList* list) {
 
+    /* Si ma liste est nulle, j'y place mon point simplement */
     if(*list == NULL) {
         *list = point;
     }
+    /* Sinon j'applique une récusivité pour que mon point se place en fin de liste */
     else {
         addPointToList(point, &(*list)->next);
     }
@@ -92,6 +97,7 @@ void drawPoints(PointList list) {
 
     /* Si ma liste n'est pas vide */
     while(list) {
+        /* Je colorie le pixel aux coordonnées du point avec la couleur spécifique du point */
         glColor3ub(list->r, list->g, list->b);
         glVertex2f(list->x, list->y);
         list = list->next;
@@ -104,6 +110,7 @@ void deletePoints(PointList* list) {
 
     /* Si ma liste n'est pas vide */
     while(*list != NULL) {
+        /* Je créée un point* pour enregistrer la valeur suivant à celle que je veux free, je free celle-ci, puis ma liste commence maintenant à ce point* */
         Point* next = (*list)->next;
         free(*list);
         *list = next;
@@ -114,10 +121,9 @@ void deletePoints(PointList* list) {
 
 /* Création de la primitive, placement dans la liste, dessin et libération de mémoire */
 Primitive* allocPrimitive(GLenum primitiveType) {
-    Primitive* primitive;
-    primitive = (Primitive*)malloc(sizeof(Primitive));
+    Primitive* primitive = (Primitive*)malloc(sizeof(Primitive));
 
-    if(!primitive) {
+    if (!primitive) {
         printf("Error at primitive malloc\n");
         exit(1);
     }
@@ -150,8 +156,9 @@ void drawPrimitives(PrimitiveList list){
     return;
 }
 
-/* Je vide d'abord les coordonnées de la primitive puis la primitive de la liste */
+/* Je vide d'abord les champs de la primitive puis la primitive de la liste */
 void deletePrimitive(PrimitiveList* list) {
+
     /* Si ma liste n'est pas vide */
     while(*list) {
         Primitive* next = (*list)->next;
@@ -240,7 +247,6 @@ void affichePalette() {
 /* Fonction qui affiche ma liste passée en paramètre */
 void afficheListe(PrimitiveList list) {
 
-    printf("iezoioezy \n");
     while (list != NULL) {
         printf("Élément dans liste de %u : x : %f y : %f \n", list->primitiveType, list->points->x, list->points->y);
         list = list->next;
@@ -248,10 +254,12 @@ void afficheListe(PrimitiveList list) {
 
 }
 
+
 /**************** MAIN ***************/
 
+
 int main(int argc, char** argv) {
-    unsigned char color = 1; /* color par défaut : rouge */
+    unsigned char color = 0; /* color par défaut : blanc */
     int mode = 0; /* mode dessin par défaut */
 
     /* Initialisation de la SDL */
@@ -340,6 +348,15 @@ int main(int argc, char** argv) {
                         case SDLK_SPACE:
                             mode = 1;
                             break;
+                        /* Reset le dessin (vide les listes puis réalloue) */
+                        case SDLK_r:
+                            deletePrimitive(&primList);
+                            addPrimitive(allocPrimitive(GL_POINTS), &primList);
+                            break; 
+                        /* Comme un ctrl + z mais possible qu'une fois pour le dernier élément */
+                        case SDLK_z:
+                            deletePoints(&primList->points);
+                            break;  
                         default:
                             mode = 0;
                         break;
@@ -380,8 +397,9 @@ int main(int argc, char** argv) {
             SDL_Delay(FRAMERATE_MILLISECONDS - elapsedTime);
         }
     }
-
+    /* Libération de la mémoire */
     deletePrimitive(&primList);
+
     /* Liberation des ressources associées à la SDL */ 
     SDL_Quit();
 
