@@ -1,9 +1,8 @@
 CC       =  gcc
 CFLAGS   = -Wall -O2 -g
-LIB      = -lSDL -lGLU -lGL -lm  
-INCLUDES = 
+LIB      = -I/Library/Frameworks/SDL.framework/Headers -I/opt/local/include `sdl-config --cflags --libs` -framework Cocoa -framework OpenGL
 
-OBJ      = minimal.o 
+OBJ      = minimal.o
 RM       = rm -f
 BIN      = minimal
 DIRNAME  = $(shell basename $$PWD)
@@ -34,5 +33,3 @@ tar : clean
 	@echo "TAR"
 	@echo "**************************"
 	cd .. && tar cvfz $(BACKUP) $(DIRNAME)
-
-
