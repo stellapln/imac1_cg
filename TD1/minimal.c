@@ -246,10 +246,11 @@ void affichePalette() {
 
 /* Fonction qui affiche ma liste passée en paramètre */
 void afficheListe(PrimitiveList list) {
+    PrimitiveList tmp = list;
 
-    while (list != NULL) {
-        printf("Élément dans liste de %u : x : %f y : %f \n", list->primitiveType, list->points->x, list->points->y);
-        list = list->next;
+    while (tmp->next != NULL) {
+        printf("Élément dans liste de %u : r : %d  v : %d b : %d : x : %f y : %f \n", tmp->primitiveType, tmp->points->r, tmp->points->g, tmp->points->b, tmp->points->x, tmp->points->y);
+        tmp = tmp->next;
     }
 
 }
@@ -277,6 +278,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Impossible d'ouvrir la fenetre. Fin du programme.\n");
         return EXIT_FAILURE;
     }
+
     resize(WINDOW_WIDTH, WINDOW_HEIGHT);  
 
     /* Titre de la fenêtre */
@@ -290,7 +292,7 @@ int main(int argc, char** argv) {
         Uint32 startTime = SDL_GetTicks();
 
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
         /* Choix du mode pour le dessin, 1 pour palette et 0 pour dessin */
         if (mode == 1) {
             affichePalette();
@@ -386,9 +388,7 @@ int main(int argc, char** argv) {
                 default:
                     break;
             }
-     
         }
-
         /* Calcul du temps écoulé */
         Uint32 elapsedTime = SDL_GetTicks() - startTime;
 
