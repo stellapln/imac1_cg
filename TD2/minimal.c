@@ -183,6 +183,7 @@ void resize(int w, int h) {
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+    //gluOrtho2D(-8., 8., -6., 6.);
     gluOrtho2D(-1., 1., -1., 1.);
 
 }
@@ -314,7 +315,7 @@ void drawCircle(int full) {
     int i;
 
     glColor3ub(255, 200, 100);
-    float angle = 3.14*2; // correspond à 2*PI
+    float angle = 3.14*2; // correspond à 2 PI, soit un tour de cercle
 
     if (full == 0) {
         glBegin(GL_LINE_STRIP);
@@ -331,9 +332,8 @@ void drawCircle(int full) {
 
         glVertex2f(0, 0); // centre du cercle
         for (i = 0 ; i <= NB_SEGMENT ; i++) { 
-            glVertex2f(0.5*(cos(i * angle / NB_SEGMENT)), (0.5*sin(i * angle / NB_SEGMENT)));
+            glVertex2f(0.5*(cos(i*angle/NB_SEGMENT)), (0.5*sin(i*angle/NB_SEGMENT)));
         }
-
         glEnd();
     }
 }
