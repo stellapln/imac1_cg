@@ -8,6 +8,7 @@
 #include <SDL/SDL.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 
 /************* CONSTANTES **************/
@@ -308,17 +309,33 @@ void drawLandmark() {
 
 }
 
-/* Fonction qui me crée un cercle de diamètre 1 */
+/* Fonction qui me crée un cercle de diamètre 1 : LINE_STRIP si vide et TRIANGLE_FAN si plein */
 void drawCircle(int full) {
     int i;
 
     glColor3ub(255, 200, 100);
-    glBegin(GL_LINES);
-    for ( i = 0 ; i < NB_SEGMENT ; i++ ) {
-        glVertex2f(0.5-i/10, 0-i/10);
-        glVertex2f(0.5-(i+1)/10, 0-(i+1)/10);
+    float angle = 3.14*2; // correspond à 2*PI
+
+    if (full == 0) {
+        glBegin(GL_LINE_STRIP);
+
+        for (i = 0 ; i <= NB_SEGMENT ; i++) {
+            float new_angle = angle*i/NB_SEGMENT;
+            glVertex2f(cos(new_angle)*0.5, sin(new_angle)*0.5); // 0.5 de rayon       
+        }
+        glEnd();  
     }
-    glEnd();  
+
+    else {
+        glBegin(GL_TRIANGLE_FAN);
+
+        glVertex2f(0, 0); // centre du cercle
+        for (i = 0 ; i <= NB_SEGMENT ; i++) { 
+            glVertex2f(0.5*(cos(i * angle / NB_SEGMENT)), (0.5*sin(i * angle / NB_SEGMENT)));
+        }
+
+        glEnd();
+    }
 }
 
 
@@ -366,8 +383,8 @@ int main(int argc, char** argv) {
         else {
             /* Mode dessin */
             drawPrimitives(primList);
-            drawCircle(full);
             drawSquare(0, 0, 255, 0, 255, full);
+            drawCircle(full);
             drawLandmark();
         }
 
