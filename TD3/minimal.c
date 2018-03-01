@@ -16,8 +16,8 @@
 
 
 /* Dimensions de la fenêtre */
-static unsigned int WINDOW_WIDTH = 800;
-static unsigned int WINDOW_HEIGHT = 600;
+static unsigned int WINDOW_WIDTH = 700;
+static unsigned int WINDOW_HEIGHT = 700;
 
 /* Nombre de bits par pixel de la fenêtre */
 static const unsigned int BIT_PER_PIXEL = 8;
@@ -188,9 +188,7 @@ void resize(int w, int h) {
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-4., 4., -3., 3.);
-    //gluOrtho2D(-1., 1., -1., 1.);
-
+    gluOrtho2D(-100., 100., -100., 100.);
 }
 
 /* Fonction qui affiche la palette par rapport aux colonnes de width */
@@ -303,14 +301,14 @@ void drawLandmark() {
     /* Abscisses */
     glColor3ub(255, 0, 0);
     glBegin(GL_LINES);
-        glVertex2f(-0.5, 0.);
-        glVertex2f(0.5, 0.);
+        glVertex2f(-5, 0.);
+        glVertex2f(5, 0.);
     glEnd();
     /* Ordonnées */
     glColor3ub(0, 255, 0);
     glBegin(GL_LINES);
-        glVertex2f(0, -0.5);
-        glVertex2f(0, 0.5);
+        glVertex2f(0, -5);
+        glVertex2f(0, 5);
     glEnd();
 
 }
@@ -319,7 +317,7 @@ void drawLandmark() {
 void drawCircle(int full) {
     int i;
 
-    glColor3ub(255, 200, 100);
+    glColor3ub(0, 255, 255);
     float angle = 3.14*2; // correspond à 2 PI, soit un tour de cercle
 
     if (full == 0) {
@@ -343,6 +341,168 @@ void drawCircle(int full) {
     }
 }
 
+/* Fonction qui me crée un carré aux bords arrondis de côté 1 */
+void drawRoundedSquare() {
+    /* 1er carré */
+    glPushMatrix();
+    glScalef(0.8,1,1);
+    drawSquare(0, 0, 0, 255, 255, 1);
+    glPopMatrix();
+    /* 2ème carré */
+    glPushMatrix();
+    glScalef(1,0.8,1);
+    drawSquare(0, 0, 0, 255, 255, 1);
+    glPopMatrix();
+    /* Cercle en bas à gauche */
+    glPushMatrix();
+    glTranslatef(-0.4,-0.4,0);
+    glScalef(0.2,0.2,1);
+    drawCircle(1);
+    glPopMatrix();
+    /* Cercle en haut à droite */
+    glPushMatrix();
+    glTranslatef(0.4,0.4,0);
+    glScalef(0.2,0.2,1);
+    drawCircle(1);
+    glPopMatrix();
+    /* Cercle en bas à droite */
+    glPushMatrix();
+    glTranslatef(0.4,-0.4,0);
+    glScalef(0.2,0.2,1);
+    drawCircle(1);
+    glPopMatrix();
+    /* Cercle en haut à gauche */
+    glPushMatrix();
+    glTranslatef(-0.4,0.4,0);
+    glScalef(0.2,0.2,1);
+    drawCircle(1);
+    glPopMatrix();
+}
+
+/* Fonction qui dessine le bras principal */
+GLuint createFirstArmIDList() {
+
+    GLuint id = glGenLists(1);
+    glNewList(id, GL_COMPILE);
+
+        /* Petit cercle de rayon 10 */
+        glPushMatrix();
+            glTranslatef(60,0,0);
+            glScalef(20,20,1);
+            drawCircle(1);
+        glPopMatrix();
+        /* Grand cercle de rayon 20 */
+        glPushMatrix();
+            glScalef(40,40,1);
+            drawCircle(1);
+        glPopMatrix(); 
+        /* Bras central qui sépare de 3 unités les cercles */    
+        glBegin(GL_LINES);
+            glVertex2f(0, 20);
+            glVertex2f(60, 10);
+            glVertex2f(0, -20);
+            glVertex2f(60, -10);
+        glEnd();
+
+    glEndList();
+
+    return id;
+}
+
+/* Fonction qui dessine le bras manipulateur en réutilisant la fonction drawRoundedSquare */
+GLuint createSecondArmIDList() {
+
+    GLuint id = glGenLists(1);
+    glNewList(id, GL_COMPILE);
+
+        /* Deux carrés séparés de 50 unités soit 50cm pour 10u/10cm */
+        /* 1er carré à bouts arrondis de côté 10 */
+        glPushMatrix();
+            glScalef(10,10,0);
+            drawRoundedSquare();
+        glPopMatrix();
+        /* 2ème carré à bouts arrondis de côté 10 */
+        glPushMatrix();
+            glTranslatef(40,0,0);
+            glScalef(10,10,0);
+            drawRoundedSquare();
+        glPopMatrix();
+
+        /* Bras central de longueur 4.6 unités */  
+        glPushMatrix();
+            glTranslatef(20,0,0);
+            glScalef(46,6,0);
+            drawSquare(0,0,0,255,255,1);
+        glPopMatrix();
+
+    glEndList();
+
+    return id;
+ }
+
+/* Fonction qui dessine le batteur utilisant le drawCircle et le drawRoundedSquare */
+GLuint createThirdArmIDList() {
+
+    GLuint id = glGenLists(1);
+    glNewList(id, GL_COMPILE);
+
+        /* Carré de côté 6 */
+        glPushMatrix();
+            glScalef(6,6,0);
+            drawRoundedSquare();
+        glPopMatrix();
+
+        /* Cercle de rayon 4 */
+        glPushMatrix();
+            glTranslatef(38,0,0);
+            glScalef(8,8,0);
+            drawCircle(1);
+        glPopMatrix();
+
+        /* Bras central de longueur 40 unités */  
+        glPushMatrix();
+            glTranslatef(20,0,0);
+            glScalef(40,4,0);
+            drawSquare(0,0,0,255,255,1);
+        glPopMatrix();
+
+   glEndList();
+
+   return id;
+}
+
+void drawFullArm(float alpha, float beta, float gamma, GLuint firstID, GLuint secondID, GLuint thirdID) {
+
+    /* Dessin de mon premier bras */
+    glPushMatrix();
+        glRotatef(alpha, 0, 0, 1);
+        glCallList(firstID); 
+        /* Dessin du second bras */
+        glPushMatrix();
+            glTranslatef(60,0,0);
+            glRotatef(beta, 0, 0, 1);
+            glCallList(secondID); 
+            /* Dessin du troisième bras */
+            glPushMatrix();
+                glTranslatef(40,0,0);
+                glRotatef(gamma, 0, 0, 1);
+                glCallList(thirdID); 
+
+                glPushMatrix();
+                    glRotatef(gamma+10, 0, 0, 1); 
+                    glCallList(thirdID); 
+
+                    glPushMatrix();
+                        glRotatef(gamma+20, 0, 0, 1);
+                        glCallList(thirdID);
+
+                    glPopMatrix();
+                glPopMatrix();
+            glPopMatrix();
+        glPopMatrix();
+    glPopMatrix();
+
+}
 
 /**************** MAIN ****************/
 
@@ -352,7 +512,8 @@ int main(int argc, char** argv) {
     int mode = 0; /* mode dessin par défaut */
     int full = 0; /* Par défaut, les objets canoniques sont vides */
     int clic = 0; /* Par défaut, le motion button pour la rotation est à 0 */
-
+    float incrementeAngle = 50; /* Ma variable pour la rotation de mon batteur que j'incrémente */
+ 
     srand(time(NULL));
 
     /* Initialisation de la SDL */
@@ -376,6 +537,11 @@ int main(int argc, char** argv) {
     /* Titre de la fenêtre */
     SDL_WM_SetCaption("L'OpenGL du Spoula", NULL);
 
+    /* Optimisation du code avec des listes de dessin */
+    GLuint firstArm = createFirstArmIDList();
+    GLuint secondArm = createSecondArmIDList();
+    GLuint thirdArm = createThirdArmIDList();
+
     /* Boucle d'affichage */
     int loop = 1;
     while(loop) {
@@ -385,42 +551,18 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         /* Choix du mode pour le dessin, 1 pour palette et 0 pour dessin */
-        if (mode == 1) {
             glMatrixMode(GL_MODELVIEW);
-            glScalef(4,3,0);
+        if (mode == 1) {
+            glScalef(100,100,0);
             affichePalette();
             glLoadIdentity();
         }
         else {
             /* Mode dessin */
-            drawPrimitives(primList);
-            /* Carré jaune qui a subi toutes les questions */
-            drawSquare(0, 0, 255, 255, 0, full);
-
-            /* Cercle translater */
-           /*glMatrixMode(GL_MODELVIEW);
-            glTranslatef(1,2,0);
-            drawCircle(full);
             glLoadIdentity();
-            /* Carré rouge translater puis rotater */
-            /*glMatrixMode(GL_MODELVIEW);
-            glTranslatef(2,0,0);
-            glRotatef(45, 0.0, 0.0, 1.0);
-            drawSquare(0, 0, 255, 0, 0, full);
-            glLoadIdentity();*/
-            /* Carré violet rotater puis translater = il n'est pas au même endroit que le précédent ("son origine" a changé) */
-            /*glMatrixMode(GL_MODELVIEW);
-            glRotatef(45, 0.0, 0.0, 1.0);
-            glTranslatef(2,0,0);
-            drawSquare(0, 0, 255, 0, 200, full);
-            glLoadIdentity();*/
-            /* Carré bleu qui bouge aléatoirement dans la fenêtre */
-            glMatrixMode(GL_MODELVIEW);
-            glTranslatef(rand() % (MAX - MIN + 1) - MIN, rand() % (MAX - MIN + 1) - MIN, 0);
-            drawSquare(0, 0, 0, 0, 255, full);
-            glLoadIdentity();
-
-            drawLandmark();
+            incrementeAngle++;
+            /* Il n'est pas intéressant de faire une liste pour le fullArm car sinon il ne bougera plus */
+            drawFullArm(45+incrementeAngle, -10+incrementeAngle, 35+incrementeAngle, firstArm, secondArm, thirdArm);
         }
 
         /* Boucle traitant les evenements */
