@@ -318,7 +318,7 @@ void drawCircle(int full) {
     int i;
 
     glColor3ub(0, 255, 255);
-    float angle = 3.14*2; // correspond à 2 PI, soit un tour de cercle
+    float angle = M_PI*2; // correspond à 2 PI, soit un tour de cercle
 
     if (full == 0) {
         glBegin(GL_LINE_STRIP);
